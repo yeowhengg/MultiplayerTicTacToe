@@ -15,3 +15,5 @@ socket.connect((HOST, PORT))
 
 socket.send(f"Connected to Server".encode('utf-8')) # sends message to server
 print(socket.recv(1024).decode('utf-8')) # prints server's message
+
+#

@@ -24,3 +24,4 @@ while True:
 
     client_communication_socket.close()  # closes socket
     print(f"Connection with {client_addr} closed")
+#
