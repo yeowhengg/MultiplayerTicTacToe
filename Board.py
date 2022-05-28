@@ -2,7 +2,9 @@ import Player
 
 
 class Board:
-    board = [["|", " ", "|", " ", "|", " ", "|"], ["|", " ", "|", " ", "|", " ", "|"], ["|", " ", "|", " ", "|", " ", "|"]]
+    board = [["|", " ", "|", " ", "|", " ", "|"], ["|", " ", "|", " ", "|", " ", "|"],
+             ["|", " ", "|", " ", "|", " ", "|"]]
+
     def __init__(self):
         self.count = None
         self.setup()
@@ -13,10 +15,9 @@ class Board:
                 print(self.board[row][col], end='')
             print("\n")
 
-    def CheckInBoard(self,selectedIndex, selectedPlacement, player):
+    def CheckInBoard(self, selectedIndex, selectedPlacement, player):
         self.selectedIndex = selectedIndex
         self.selectedPlacement = selectedPlacement;
-
 
     def SetPlayerInBoard(self, count, player):
         self.count = count
@@ -44,10 +45,6 @@ class Board:
 
                 print(self.Board.board[row][col], end='')
             print("\n")
-
-
-
-
 
     def DiagonalWin(self):
         pass
