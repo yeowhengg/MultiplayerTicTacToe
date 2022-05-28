@@ -10,6 +10,7 @@ from Board import *
 from Player import *
 
 
+
 def game():
     print("Welcome to online tic tac toe!")
     board = Board()
@@ -39,7 +40,6 @@ def PlayerMove(p1, p2):
         p2.turn = False
         p1.turn = True
         board.Board.SetPlayerInBoard(board, move, p2)
-
 
     nextTurn = "Player 2, it is your turn." if p1.turn == False else "Player 1, it is your turn."
     print(nextTurn)
