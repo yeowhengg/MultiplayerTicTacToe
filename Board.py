@@ -36,7 +36,6 @@ class Board:
             return "X"
         if leftDiagonalString == "OOO" or rightDiagonalString == "OOO":
             return "O"
-
         return ""
 
     def VerticalWin(self, column):
@@ -54,17 +53,13 @@ class Board:
         for i in range(len(self.board)):
             for j in range(len(self.board[i])):
                 concat += self.board[i][j]
-
         if "XXX" in concat:
             return "X"
-
         if "OOO" in concat:
             return "O"
-
         return ""
 
     def GameWinOrLose(self, count, winner):
-        print(winner == "X" + str(" X wins"))
         if count == 9:
             return True
         if winner == "X" or winner == "O":
