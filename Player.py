@@ -9,7 +9,9 @@ class Player:
     def TurnToMove(self, turn):
         self.turn = turn
 
-    def move(self, position):
-        self.position = position
+    def move(self, column, row):
+        self.row = row
+        self.column = column
+
 
 

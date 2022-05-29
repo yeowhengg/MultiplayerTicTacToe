@@ -1,56 +1,72 @@
-import Player
-
-
 class Board:
-    board = [["|", " ", "|", " ", "|", " ", "|"], ["|", " ", "|", " ", "|", " ", "|"],
-             ["|", " ", "|", " ", "|", " ", "|"]]
+    board = [[" ", " ", " "], [" ", " ", " "], [" ", " ", " "]]
 
     def __init__(self):
-        self.count = None
-        self.setup()
+        self.PrintBoard()
 
-    def setup(self):
+    def PrintBoard(self):
         for row in range(0, len(self.board)):
             for col in range(0, len(self.board[row])):
+                print("|", end='')
                 print(self.board[row][col], end='')
+            print("|")
             print("\n")
 
-    def CheckInBoard(self, selectedIndex, selectedPlacement, player):
-        self.selectedIndex = selectedIndex
-        self.selectedPlacement = selectedPlacement;
+    def CheckInBoard(self, row, column, player):
+        if self.board[row - 1][column - 1] == " ":
+            return True
+        elif self.board[row - 1][column - 1] == player.symbol:
+            self.PrintBoard()
+            print(f"You already used this place!\nIt is still your turn, {player.symbol}:")
+            return False
+        elif self.board[row - 1][column - 1] != " " and self.board[row - 1][column - 1] != player.symbol:
+            self.PrintBoard()
+            print(f"This place has been claimed by the other player.\nIt is still your turn, {player.symbol}:")
+            return False
 
-    def SetPlayerInBoard(self, count, player):
-        self.count = count
-        for row in range(0, len(self.Board.board)):
-            for col in range(0, len(self.Board.board[row])):
-                self.Board.CheckInBoard(self, row, col, player)
-                if count == 1:
-                    Board.board[0][count] = player.symbol
-                if count == 2:
-                    Board.board[0][count + 1] = player.symbol
-                if count == 3:
-                    Board.board[0][count + 2] = player.symbol
-                if count == 4:
-                    Board.board[1][count - 3] = player.symbol
-                if count == 5:
-                    Board.board[1][count - 2] = player.symbol
-                if count == 6:
-                    Board.board[1][count - 1] = player.symbol
-                if count == 7:
-                    Board.board[2][count - 6] = player.symbol
-                if count == 8:
-                    Board.board[2][count - 5] = player.symbol
-                if count == 9:
-                    Board.board[2][count - 4] = player.symbol
-
-                print(self.Board.board[row][col], end='')
-            print("\n")
+    def SetPlayerInBoard(self, row, column, player):
+        self.row = row
+        self.column = column
+        Board.board[row - 1][column - 1] = player.symbol
 
     def DiagonalWin(self):
-        pass
+        leftDiagonalString = f"{self.board[0][0]}{self.board[1][1]}{self.board[2][2]}"
+        rightDiagonalString = f"{self.board[0][2]}{self.board[1][1]}{self.board[2][1]}"
+        if leftDiagonalString == "XXX" or rightDiagonalString == "XXX":
+            return "X"
+        if leftDiagonalString == "OOO" or rightDiagonalString == "OOO":
+            return "O"
 
-    def VerticalWin(self):
-        pass
+        return ""
+
+    def VerticalWin(self, column):
+        concat = ""
+        for i in range(len(self.board)):
+            concat += self.board[i][column - 1]
+        if concat == "XXX":
+            return "X"
+        if concat == "OOO":
+            return "O"
+        return ""
 
     def HorizontalWin(self):
-        pass
+        concat = ""
+        for i in range(len(self.board)):
+            for j in range(len(self.board[i])):
+                concat += self.board[i][j]
+
+        if "XXX" in concat:
+            return "X"
+
+        if "OOO" in concat:
+            return "O"
+
+        return ""
+
+    def GameWinOrLose(self, count, winner):
+        print(winner == "X" + str(" X wins"))
+        if count == 9:
+            return True
+        if winner == "X" or winner == "O":
+            print(f"Congratulations {winner}! You won!")
+            return True
