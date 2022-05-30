@@ -31,7 +31,7 @@ def game():
 
 
 def PlayerMove(p1, p2):
-    empty_string = ""
+    winner_string = ""
     row = int(input("Enter the row: "))
     column = int(input("Enter your position: "))
     if p1.turn:
@@ -52,13 +52,14 @@ def PlayerMove(p1, p2):
         p2.turn = False
         p1.turn = True
 
-    empty_string += board.DiagonalWin()
-    empty_string += board.VerticalWin(column)
-    empty_string += board.HorizontalWin()
+    winner_string += board.DiagonalWin()
+    winner_string += board.VerticalWin(column)
+    winner_string += board.HorizontalWin()
 
-    nextTurn = "Player 2, it is your turn." if p1.turn == False else "Player 1, it is your turn."
-    print(nextTurn)
+    if winner_string == " ":
+        nextTurn = "Player 2, it is your turn." if p1.turn == False else "Player 1, it is your turn."
+        print(nextTurn)
 
-    return empty_string
+    return winner_string
 
 game()

@@ -7,7 +7,7 @@ Created on Thu May 26 19:17:06 2022
 import socket
 import Game
 
-HOST = "192.168.10.123"  # getting server's priv ipv4
+HOST = "127.0.0.1"  # getting server's priv ipv4
 PORT = 6969
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind((HOST, PORT))
