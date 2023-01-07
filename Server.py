@@ -11,27 +11,39 @@ class Server:
         self.MAX_CONN = 2
         self.connected_clients = []
 
+    def incoming_message(self, server_socket: socket.socket, client_addr):
+        while True:
+            try:
+                client_msg = server_socket.recv(2048)
+                
+                message = client_msg.decode('utf-8')
+                print(message)
+
+                if message.__contains__('Send all'):
+                    for all_clients_sockets in self.connected_clients:
+                        if all_clients_sockets != client_addr:
+                            print(
+                                f"{client_addr} is sending a message to everyone...")
+                            all_clients_sockets.send(bytes(
+                                f"Client {client_addr} has sent a message to everyone! It is: {message}", encoding='utf-8'))
+
+                    server_socket.sendto(bytes(
+                        f"You have sent the message: '{message}' to everyone!", encoding='utf-8'), client_addr)
+
+                else:
+                    print(f"Incoming message from {client_addr}: {message}")
+                    server_socket.send(
+                        bytes(f"Server has received your message. It is: {message}", encoding='utf-8'))
+            except Exception:
+                import traceback
+                print(traceback.format_exc())
+
+    # Handles broadcast message or single message to server
     def client_handler(self, server_socket: socket.socket, client_addr):
         server_socket.send(bytes('You are now connected to server...', encoding='utf-8'))
+        start_new_thread(self.incoming_message, (server_socket, client_addr))
 
-        while True:
-            client_msg = server_socket.recv(2048)
-            message = client_msg.decode('utf-8')
-        
-            if message.__contains__('Send all'):
-                for all_clients_sockets in self.connected_clients:
-                    if all_clients_sockets != client_addr:
-                        print(f"{client_addr} is sending a message to everyone...")
-                        all_clients_sockets.send(bytes(f"Client {client_addr} has sent a message to everyone! It is: {message}", encoding='utf-8'))
-
-                server_socket.sendto(bytes(f"You have sent the message: '{message}' to everyone!", encoding='utf-8'), client_addr)
-                        
-            else:
-                print(f"Incoming message from {client_addr}: {message}")
-                server_socket.send(
-                    bytes(f"Server has received your message. It is: {message}", encoding='utf-8'))
-
-
+    # Accepts and assign new thread to each client
     def accept_connections(self, server_socket: socket.socket):
         client_socket, client_address = server_socket.accept()
         self.connected_clients.append(client_socket)
@@ -53,7 +65,7 @@ class Server:
         server_socket.listen()
 
         while True:
-
+            # Rejects subsequent connections if there are already 2 connected clients
             if len(self.connected_clients) >= self.MAX_CONN:
                 reject_client_socket, reject_client_addr = server_socket.accept()
                 reject_client_socket.send(bytes(
