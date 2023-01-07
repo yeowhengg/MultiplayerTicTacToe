@@ -1,19 +1,34 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu May 26 19:18:40 2022
-
-@author: YeowHeng
-"""
 import socket
-import Game
 
-HOST = "127.0.0.1"  # getting server's priv ipv4
-PORT = 6969
+host = '127.0.0.1'
+port = 6969
 
-socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-socket.connect((HOST, PORT))
+client_socket = socket.socket()
+print('Waiting for connection')
 
-socket.send(f"Connected to Server".encode('utf-8')) # sends message to server
-print(socket.recv(1024).decode('utf-8')) # prints server's message
+try:
+    # Client socket will be binded on 127.0.0.1:6969
+    client_socket.connect((host, port))
 
-#
+except socket.error as e:
+    print(str(e))
+
+if client_socket.recv(2).decode('utf-8') == '-1':
+    print('Sorry, server has exceeded maximum of connection. Please try again at a later time.')
+    client_socket.close()
+    
+else:
+    # After establishing connection to the server, we can send messages back and forth from the server
+    print(client_socket.recv(1024).decode('utf-8')) # Initial message
+    while True:
+        try:
+
+            msg_to_send = str(input('Your message: '))
+            if msg_to_send != "":
+                client_socket.send(msg_to_send.encode('utf-8'))
+                server_response = client_socket.recv(1024)
+                print(server_response.decode('utf-8'))
+                
+        except Exception as e:
+            print(e)
+

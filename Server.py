@@ -1,27 +1,67 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu May 26 19:17:06 2022
-
-@author: YeowHeng
-"""
+# Imports
 import socket
-import Game
+from _thread import *
 
-HOST = "127.0.0.1"  # getting server's priv ipv4
-PORT = 6969
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind((HOST, PORT))
-server.listen(2)
+# Declarations
+host = '127.0.0.1'
+port = 6969
 
-while True:
-    client_communication_socket, client_addr = server.accept()  # allow client to connect
-    print(f"Connected to Client: {client_addr}")
+class Server:
+    def __init__(self):
+        self.MAX_CONN = 2
+        self.connected_clients = []
 
-    message = client_communication_socket.recv(1024).decode('utf-8')  # decode client's message
-    print(f"Message from client is: {message}") # print client's msg
+    def client_handler(self, server_socket: socket.socket, client_addr):
+        server_socket.send(bytes('You are now connected to server...', encoding='utf-8'))
 
-    client_communication_socket.send(f"I'm connected to you".encode('utf-8'))  # encode text to utf 8 to send
+        while True:
+            client_msg = server_socket.recv(2048)
+            message = client_msg.decode('utf-8')
+        
+            if message.__contains__('Send all'):
+                for all_clients_sockets in self.connected_clients:
+                    if all_clients_sockets != client_addr:
+                        print(f"{client_addr} is sending a message to everyone...")
+                        all_clients_sockets.send(bytes(f"Client {client_addr} has sent a message to everyone! It is: {message}", encoding='utf-8'))
 
-    client_communication_socket.close()  # closes socket
-    print(f"Connection with {client_addr} closed")
-#
+                server_socket.sendto(bytes(f"You have sent the message: '{message}' to everyone!", encoding='utf-8'), client_addr)
+                        
+            else:
+                print(f"Incoming message from {client_addr}: {message}")
+                server_socket.send(
+                    bytes(f"Server has received your message. It is: {message}", encoding='utf-8'))
+
+
+    def accept_connections(self, server_socket: socket.socket):
+        client_socket, client_address = server_socket.accept()
+        self.connected_clients.append(client_socket)
+        print(f'Incoming connection accepted. Address: {client_address}')
+        start_new_thread(self.client_handler, (client_socket, client_address))
+
+
+    def start_server(self, host, port):
+        server_socket = socket.socket()
+
+        try:
+            server_socket.bind((host, port))
+        except socket.error as e:
+            print(str(e))
+
+        print(f'Server is listing on port {port}...')
+        
+        # Accepts incoming connection
+        server_socket.listen()
+
+        while True:
+
+            if len(self.connected_clients) >= self.MAX_CONN:
+                reject_client_socket, reject_client_addr = server_socket.accept()
+                reject_client_socket.send(bytes(
+                    "-1", encoding='utf-8'))
+
+                continue
+
+            self.accept_connections(server_socket)
+
+server = Server()
+server.start_server(host, port)
