@@ -22,39 +22,39 @@ class Client:
         print("_______")
             
 
-    def message_handler(self, server_socket):
+    def message_handler(self, client_socket):
         while True:
             user_input = input()
             if user_input != "":
-                server_socket.send(user_input.encode('utf-8'))
+                client_socket.send(user_input.encode('utf-8'))
 
-    def incoming_message(self, server_socket):
+    def incoming_message(self, client_socket):
         while True:
             ready_sockets, _, _ = select.select(
-                [server_socket], [], [], 60
+                [client_socket], [], [], 60
             )
             if ready_sockets:
-                received_board = server_socket.recv(1024)
+                received_board = client_socket.recv(1024)
                 self.board = pickle.loads(received_board)
                 self.print_board()
                 
     def start_client(self):
         try:
-            server_socket = socket.socket()
+            client_socket = socket.socket()
             # Client socket will be binded on 127.0.0.1:6969
-            server_socket.connect((host, port))
+            client_socket.connect((host, port))
 
         except socket.error as e:
             print(str(e))
 
-        if server_socket.recv(2).decode('utf-8') == '-1':
-            print('Sorry, server has exceeded maximum of connection. Please try again at a later time.')
-            server_socket.close()
+        if client_socket.recv(2).decode('utf-8') == '-1':
+            print('Sorry, client has exceeded maximum of connection. Please try again at a later time.')
+            client_socket.close()
 
-        # After establishing connection to the server, we can send messages back and forth from the server
-        print(server_socket.recv(1024).decode())
-        start_new_thread(self.incoming_message, (server_socket, ))
-        start_new_thread(self.message_handler(server_socket, ))
+        # After establishing connection to the client, we can send messages back and forth from the client
+        print(client_socket.recv(1024).decode())
+        start_new_thread(self.incoming_message, (client_socket, ))
+        start_new_thread(self.message_handler(client_socket, ))
 
 
 client = Client()
