@@ -2,9 +2,10 @@
 import socket
 from _thread import *
 from Board import *
-import pickle
+import json
 from Player import *
 from random import Random
+import queue
 
 # Declarations
 host = '127.0.0.1'
@@ -16,17 +17,23 @@ class Server:
         self.connected_clients = {}
         self.players = {}
         self.board = board.get_board()
-        
+    
+    def send_updates(self, client_address):
+        if self.connected_clients[f'{client_address}'].recv(50).decode() == "received board":
+            self.connected_clients[f"{client_address}"].sendto(
+                bytes(f"You {self.players[f'{client_address}'].symbol} sent ", encoding='utf-8'), client_address)
+
     def send_board(self):
         for all_connected_clients in self.connected_clients:
-            self.connected_clients[all_connected_clients].send(pickle.dumps(self.board))
+            self.connected_clients[all_connected_clients].send(bytes(json.dumps(self.board), encoding='utf-8'))
 
-    def incoming_message(self, client_socket: socket.socket):
+    def incoming_message(self, client_socket: socket.socket, client_address):
         while True:
             try:
+                print('hello?')
                 client_msg = client_socket.recv(2048)
-                message = client_msg.decode('utf-8')
-                print(f"Player chose: {message}")
+                move = client_msg.decode('utf-8')
+                print(f"Player {self.players[f'{client_address}'].symbol} chose: {move}")
                 self.send_board()
             
             except Exception:
@@ -34,33 +41,36 @@ class Server:
                 print(traceback.format_exc())
                 socket.close()
 
-    # Handles broadcast message or single message to server
-    def client_handler(self, client_socket: socket.socket):
-        client_socket.send(bytes('You are now connected to server...', encoding='utf-8'))
-        self.send_board()
-        
+    # Handles new player. Assigns them with their symbols
+    def client_handler(self, client_socket: socket.socket, client_address):
+        client_socket.send(bytes('You are now connected to server...', encoding='utf-8'))        
         # We assign the players based on first come first serve basis
-        if len(self.connected_clients) == 2:
-            ran = Random()
-            p1 = Player(ran.choice(["X", "O"]))
-            p2 = Player("")
-            p2.symbol = "O" if p1.symbol == "X" else "X"
+        ran = Random()
+        p1 = Player(ran.choice(["X", "O"]))
+        p2 = Player("")
+        p2.symbol = "O" if p1.symbol == "X" else "X"
+        p1.chosen = True
 
+        self.players.update({
+            f"{client_address}": p1 if p1.chosen == False else p2
+        })
 
+        player = self.players[f"{client_address}"]
 
-        start_new_thread(self.incoming_message, (client_socket, ))
+        client_socket.send(bytes(f"You are player {player.symbol} :", encoding='utf-8'))
+        self.send_board()
 
     # Accepts and assign new thread to each client
     def accept_connections(self, server_socket: socket.socket):
         client_socket, client_address = server_socket.accept()
+
         self.connected_clients.update({
             f"{client_address}" : client_socket 
         })
 
-        print(self.connected_clients)
         print(f'Incoming connection accepted. Address: {client_address}')
-        start_new_thread(self.client_handler, (client_socket, ))
-
+        start_new_thread(self.client_handler, (client_socket, client_address))
+        start_new_thread(self.incoming_message, (client_socket, client_address))
 
     def start_server(self, host, port):
         server_socket = socket.socket()

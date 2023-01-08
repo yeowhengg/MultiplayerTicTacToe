@@ -5,6 +5,7 @@ class Player:
         self.turn = False
         self.position = None
         self.symbol = symbol
+        self.chosen = False
     
     def TurnToMove(self, turn):
         self.turn = turn

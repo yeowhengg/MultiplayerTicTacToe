@@ -1,7 +1,7 @@
 import socket
 from _thread import *
 import select
-import pickle
+import json
 
 host = '127.0.0.1'
 port = 6969
@@ -10,8 +10,8 @@ class Client:
         print('Waiting for connection')
         self.board = None
     
-    def print_board(self):
-        # Loop 3 times
+    def print_board(self, board):
+        self.board = json.loads(board)
         print("_______\n")
         for row in range(0, len(self.board)):
             for col in range(0, len(self.board[row])):
@@ -29,14 +29,21 @@ class Client:
                 client_socket.send(user_input.encode('utf-8'))
 
     def incoming_message(self, client_socket):
+        initial_data = client_socket.recv(1024).decode()
+        player, board = initial_data.split(":")
+        print(player)
+        self.print_board(board)
+
         while True:
             ready_sockets, _, _ = select.select(
                 [client_socket], [], [], 60
             )
             if ready_sockets:
-                received_board = client_socket.recv(1024)
-                self.board = pickle.loads(received_board)
-                self.print_board()
+                try:
+                    receive_board = client_socket.recv(1024).decode()
+                    self.print_board(receive_board)
+                except Exception as e:
+                    print(e)
                 
     def start_client(self):
         try:
@@ -52,7 +59,10 @@ class Client:
             client_socket.close()
 
         # After establishing connection to the client, we can send messages back and forth from the client
+        
+        # Prints "you are connected to server"
         print(client_socket.recv(1024).decode())
+
         start_new_thread(self.incoming_message, (client_socket, ))
         start_new_thread(self.message_handler(client_socket, ))
 
