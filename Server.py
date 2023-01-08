@@ -16,6 +16,8 @@ class Server:
         self.connected_clients = {}
         self.players = {}
         self.board = board.get_board()
+        self.x_chosen = False
+        self.p1_assigned = False
 
     def send_board(self):
         for all_connected_clients in self.connected_clients:
@@ -41,19 +43,21 @@ class Server:
                 print(traceback.format_exc())
                 socket.close()
 
-    # Handles new player. Assigns them with their symbols
+    # Handles new player. Assigns them with their symbols and also print board for them initially
     def client_handler(self, client_socket: socket.socket, client_address):
-        print(client_address)
-        client_socket.send(bytes('You are now connected to server...', encoding='utf-8'))        
-        # We assign the players based on first come first serve basis
-        ran = Random()
-        p1 = Player(ran.choice(["X", "O"]))
-        p2 = Player("")
-        p2.symbol = "O" if p1.symbol == "X" else "X"
-        p1.chosen = True
+        client_socket.send(bytes('You are now connected to server...', encoding='utf-8'))
 
+        # We assign the players based on first come first serve basis
+        ran_symbol = Random().choice(["X", "O"])
+        player1 = Player(ran_symbol)
+        self.p1_assigned = True
+        self.x_chosen = True if player1.symbol == "X" else False
+
+        player2 = Player("")
+        player2.symbol = "O" if self.x_chosen == True else "X"
+    
         self.players.update({
-            f"{client_address}": p1 if p1.chosen == False else p2
+            f"{client_address}": player1 if self.p1_assigned == False else player2
         })
 
         player = self.players[f"{client_address}"]
@@ -70,7 +74,7 @@ class Server:
         })
 
         print(f'Incoming connection accepted. Address: {client_address}')
-        start_new_thread(self.client_handler, (client_socket, client_address))
+        self.client_handler(client_socket, client_address)
         start_new_thread(self.incoming_message, (client_socket, client_address))
 
     def start_server(self, host, port):
