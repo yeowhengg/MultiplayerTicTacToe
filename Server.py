@@ -44,7 +44,7 @@ class Server:
                 socket.close()
 
     # Handles new player. Assigns them with their symbols and also print board for them initially
-    def client_handler(self, client_socket: socket.socket, client_address):
+    def player_handler(self, client_socket: socket.socket, client_address):
         client_socket.send(bytes('You are now connected to server...', encoding='utf-8'))
 
         # We assign the players based on first come first serve basis
@@ -74,7 +74,7 @@ class Server:
         })
 
         print(f'Incoming connection accepted. Address: {client_address}')
-        self.client_handler(client_socket, client_address)
+        self.player_handler(client_socket, client_address)
         start_new_thread(self.handle_player_choice, (client_socket, client_address))
 
     def start_server(self, host, port):
