@@ -14,16 +14,18 @@ class Server:
         self.connected_clients = []
         self.board = board.get_board()
         
-    def send_board(self, server_socket: socket.socket):
-        server_socket.send(pickle.dumps(self.board))
+    def send_board(self):
+        for all_connected_clients in self.connected_clients:
+            all_connected_clients.send(pickle.dumps(self.board))
 
-    def incoming_message(self, server_socket: socket.socket, client_addr):
+    def incoming_message(self, server_socket: socket.socket):
         while True:
             try:
                 client_msg = server_socket.recv(2048)
                 message = client_msg.decode('utf-8')
                 print(f"Message from client: {message}")
-                self.send_board(server_socket)
+                
+                self.send_board()
 
             except Exception:
                 import traceback
@@ -31,16 +33,17 @@ class Server:
                 socket.close()
 
     # Handles broadcast message or single message to server
-    def client_handler(self, server_socket: socket.socket, client_addr):
+    def client_handler(self, server_socket: socket.socket):
         server_socket.send(bytes('You are now connected to server...', encoding='utf-8'))
-        start_new_thread(self.incoming_message, (server_socket, client_addr))
+        self.send_board()
+        start_new_thread(self.incoming_message, (server_socket, ))
 
     # Accepts and assign new thread to each client
     def accept_connections(self, server_socket: socket.socket):
         client_socket, client_address = server_socket.accept()
         self.connected_clients.append(client_socket)
         print(f'Incoming connection accepted. Address: {client_address}')
-        start_new_thread(self.client_handler, (client_socket, client_address))
+        start_new_thread(self.client_handler, (client_socket, ))
 
 
     def start_server(self, host, port):
