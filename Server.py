@@ -1,6 +1,8 @@
 # Imports
 import socket
 from _thread import *
+from Board import *
+import pickle
 
 # Declarations
 host = '127.0.0.1'
@@ -10,33 +12,23 @@ class Server:
     def __init__(self):
         self.MAX_CONN = 2
         self.connected_clients = []
+        self.board = board.get_board()
+        
+    def send_board(self, server_socket: socket.socket):
+        server_socket.send(pickle.dumps(self.board))
 
     def incoming_message(self, server_socket: socket.socket, client_addr):
         while True:
             try:
                 client_msg = server_socket.recv(2048)
-                
                 message = client_msg.decode('utf-8')
-                print(message)
+                print(f"Message from client: {message}")
+                self.send_board(server_socket)
 
-                if message.__contains__('Send all'):
-                    for all_clients_sockets in self.connected_clients:
-                        if all_clients_sockets != client_addr:
-                            print(
-                                f"{client_addr} is sending a message to everyone...")
-                            all_clients_sockets.send(bytes(
-                                f"Client {client_addr} has sent a message to everyone! It is: {message}", encoding='utf-8'))
-
-                    server_socket.sendto(bytes(
-                        f"You have sent the message: '{message}' to everyone!", encoding='utf-8'), client_addr)
-
-                else:
-                    print(f"Incoming message from {client_addr}: {message}")
-                    server_socket.send(
-                        bytes(f"Server has received your message. It is: {message}", encoding='utf-8'))
             except Exception:
                 import traceback
                 print(traceback.format_exc())
+                socket.close()
 
     # Handles broadcast message or single message to server
     def client_handler(self, server_socket: socket.socket, client_addr):
@@ -75,5 +67,6 @@ class Server:
 
             self.accept_connections(server_socket)
 
+board = Board()
 server = Server()
 server.start_server(host, port)

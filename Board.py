@@ -1,16 +1,10 @@
 class Board:
-    board = [[" ", " ", " "], [" ", " ", " "], [" ", " ", " "]]
 
     def __init__(self):
-        self.PrintBoard()
-
-    def PrintBoard(self):
-        for row in range(0, len(self.board)):
-            for col in range(0, len(self.board[row])):
-                print("|", end='')
-                print(self.board[row][col], end='')
-            print("|")
-            print("\n")
+        self.board = [[" ", " ", " "], [" ", " ", " "], [" ", " ", " "]]
+    
+    def get_board(self):
+        return self.board
 
     def CheckInBoard(self, row, column, player):
         if self.board[row - 1][column - 1] == " ":
