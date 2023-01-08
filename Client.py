@@ -24,9 +24,19 @@ class Client:
 
     def message_handler(self, client_socket):
         while True:
-            user_input = input()
-            if user_input != "":
-                client_socket.send(user_input.encode('utf-8'))
+            player_move = []
+            row_input = input()
+
+            if row_input != "":
+                player_move.append(row_input)
+
+                col_input = input()
+                if col_input != "":
+                    player_move.append(col_input)
+
+            client_socket.send(bytes(json.dumps(player_move), encoding='utf-8'))
+            
+
 
     def incoming_message(self, client_socket):
         initial_data = client_socket.recv(1024).decode()

@@ -5,7 +5,6 @@ from Board import *
 import json
 from Player import *
 from random import Random
-import queue
 
 # Declarations
 host = '127.0.0.1'
@@ -17,11 +16,6 @@ class Server:
         self.connected_clients = {}
         self.players = {}
         self.board = board.get_board()
-    
-    def send_updates(self, client_address):
-        if self.connected_clients[f'{client_address}'].recv(50).decode() == "received board":
-            self.connected_clients[f"{client_address}"].sendto(
-                bytes(f"You {self.players[f'{client_address}'].symbol} sent ", encoding='utf-8'), client_address)
 
     def send_board(self):
         for all_connected_clients in self.connected_clients:
@@ -32,8 +26,14 @@ class Server:
             try:
                 print('hello?')
                 client_msg = client_socket.recv(2048)
-                move = client_msg.decode('utf-8')
-                print(f"Player {self.players[f'{client_address}'].symbol} chose: {move}")
+                player_move = json.loads(client_msg.decode('utf-8'))
+                row = player_move[0]
+                col = player_move[1]
+
+                player = self.players[f'{client_address}']
+                print(f"Player {player.symbol} chose row: {row} col: {col}")
+
+                board.SetPlayerInBoard(int(row), int(col), player)
                 self.send_board()
             
             except Exception:
@@ -43,6 +43,7 @@ class Server:
 
     # Handles new player. Assigns them with their symbols
     def client_handler(self, client_socket: socket.socket, client_address):
+        print(client_address)
         client_socket.send(bytes('You are now connected to server...', encoding='utf-8'))        
         # We assign the players based on first come first serve basis
         ran = Random()

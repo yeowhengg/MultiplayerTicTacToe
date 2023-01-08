@@ -10,18 +10,16 @@ class Board:
         if self.board[row - 1][column - 1] == " ":
             return True
         elif self.board[row - 1][column - 1] == player.symbol:
-            self.PrintBoard()
             print(f"You already used this place!\nIt is still your turn, {player.symbol}:")
             return False
         elif self.board[row - 1][column - 1] != " " and self.board[row - 1][column - 1] != player.symbol:
-            self.PrintBoard()
             print(f"This place has been claimed by the other player.\nIt is still your turn, {player.symbol}:")
             return False
 
     def SetPlayerInBoard(self, row, column, player):
         self.row = row
         self.column = column
-        Board.board[row - 1][column - 1] = player.symbol
+        self.board[row - 1][column - 1] = player.symbol
 
     def DiagonalWin(self):
         leftDiagonalString = f"{self.board[0][0]}{self.board[1][1]}{self.board[2][2]}"
