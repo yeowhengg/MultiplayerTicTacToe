@@ -22,7 +22,7 @@ class Client:
         print("_______")
             
 
-    def message_handler(self, client_socket):
+    def player_move_handler(self, client_socket):
         while True:
             player_move = []
             row_input = input()
@@ -36,8 +36,6 @@ class Client:
 
             client_socket.send(bytes(json.dumps(player_move), encoding='utf-8'))
             
-
-
     def incoming_message(self, client_socket):
         initial_data = client_socket.recv(1024).decode()
         player, board = initial_data.split(":")
@@ -74,7 +72,7 @@ class Client:
         print(client_socket.recv(1024).decode())
 
         start_new_thread(self.incoming_message, (client_socket, ))
-        start_new_thread(self.message_handler(client_socket, ))
+        start_new_thread(self.player_move_handler(client_socket, ))
 
 
 client = Client()

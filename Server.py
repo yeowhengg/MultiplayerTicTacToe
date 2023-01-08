@@ -23,7 +23,7 @@ class Server:
         for all_connected_clients in self.connected_clients:
             self.connected_clients[all_connected_clients].send(bytes(json.dumps(self.board), encoding='utf-8'))
 
-    def incoming_message(self, client_socket: socket.socket, client_address):
+    def handle_player_choice(self, client_socket: socket.socket, client_address):
         while True:
             try:
                 print('hello?')
@@ -75,7 +75,7 @@ class Server:
 
         print(f'Incoming connection accepted. Address: {client_address}')
         self.client_handler(client_socket, client_address)
-        start_new_thread(self.incoming_message, (client_socket, client_address))
+        start_new_thread(self.handle_player_choice, (client_socket, client_address))
 
     def start_server(self, host, port):
         server_socket = socket.socket()
