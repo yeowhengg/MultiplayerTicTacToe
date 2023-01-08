@@ -5,9 +5,8 @@ class Player:
         self.turn = False
         self.position = None
         self.symbol = symbol
-        self.chosen = False
     
-    def TurnToMove(self, turn):
+    def turn_to_move(self, turn):
         self.turn = turn
 
     def move(self, column, row):

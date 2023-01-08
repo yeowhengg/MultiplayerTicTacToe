@@ -18,6 +18,8 @@ class Server:
         self.board = board.get_board()
         self.x_chosen = False
         self.p1_assigned = False
+        self.symbol = ["X", "O"]
+        self.turn = [True, False]
 
     def send_board(self):
         for all_connected_clients in self.connected_clients:
@@ -48,19 +50,28 @@ class Server:
         client_socket.send(bytes('You are now connected to server...', encoding='utf-8'))
 
         # We assign the players based on first come first serve basis
-        ran_symbol = Random().choice(["X", "O"])
-        player1 = Player(ran_symbol)
+        ran = Random()
+
+        player1 = Player("")
         self.p1_assigned = True
-        self.x_chosen = True if player1.symbol == "X" else False
 
         player2 = Player("")
-        player2.symbol = "O" if self.x_chosen == True else "X"
     
         self.players.update({
             f"{client_address}": player1 if self.p1_assigned == False else player2
         })
 
         player = self.players[f"{client_address}"]
+        player.symbol = ran.choice(self.symbol)
+        player.turn = ran.choice(self.turn)
+
+        self.turn.remove(player.turn)
+        self.symbol.remove(player.symbol)
+
+        if player.turn == True:
+            for i in self.connected_clients:
+                self.connected_clients[i].send(bytes(f"It is player {player.symbol}'s turn",encoding='utf-8'))
+
 
         client_socket.send(bytes(f"You are player {player.symbol} :", encoding='utf-8'))
         self.send_board()
