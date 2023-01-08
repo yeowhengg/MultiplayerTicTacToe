@@ -17,6 +17,7 @@ def game():
     p1 = Player(ran.choice(["X", "O"]))
     p2 = Player("")
     p2.symbol = "O" if p1.symbol == "X" else "X"
+    
     p1.turn = ran.choice([True, False])
     p2.turn = True if p1.turn == False else False
     starting_msg = "Player 1, you go first" if p1.turn == 1 else "Player 2, you go first"
