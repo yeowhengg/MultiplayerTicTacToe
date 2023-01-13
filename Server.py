@@ -20,12 +20,16 @@ class Server:
         self.p1_assigned = False
         self.symbol = ["X", "O"]
         self.turn = [True, False]
+        self.start_game = False
 
     def send_board(self):
         for all_connected_clients in self.connected_clients:
-            self.connected_clients[all_connected_clients].send(bytes(json.dumps(self.board), encoding='utf-8'))
+            self.connected_clients[all_connected_clients].sendall(bytes(json.dumps(self.board), encoding='utf-8'))
 
     def handle_player_choice(self, client_socket: socket.socket, client_address):
+        while self.start_game == False:
+            continue
+        
         while True:
             try:
                 print('hello?')
@@ -47,35 +51,36 @@ class Server:
 
     # Handles new player. Assigns them with their symbols and also print board for them initially
     def player_handler(self, client_socket: socket.socket, client_address):
-        client_socket.send(bytes('You are now connected to server...', encoding='utf-8'))
+        client_socket.sendall(bytes('You are now connected to server...', encoding='utf-8'))
 
         # We assign the players based on first come first serve basis
-        ran = Random()
 
         player1 = Player("")
-        self.p1_assigned = True
-
         player2 = Player("")
-    
+
         self.players.update({
             f"{client_address}": player1 if self.p1_assigned == False else player2
         })
 
         player = self.players[f"{client_address}"]
+        ran = Random()
         player.symbol = ran.choice(self.symbol)
         player.turn = ran.choice(self.turn)
-
         self.turn.remove(player.turn)
         self.symbol.remove(player.symbol)
+        self.p1_assigned = True
 
+        client_socket.sendall(bytes(f"You are player {player.symbol}", encoding='utf-8'))
+        while self.start_game == False:
+            client_socket.sendall(bytes(f"-2", encoding='utf-8'))
+
+            if len(self.connected_clients) == 2:
+                self.start_game = True
+        
         if player.turn == True:
-            for i in self.connected_clients:
-                self.connected_clients[i].send(bytes(f"It is player {player.symbol}'s turn",encoding='utf-8'))
-
-
-        client_socket.send(bytes(f"You are player {player.symbol} :", encoding='utf-8'))
-        self.send_board()
-
+            for client_address in self.connected_clients:
+                self.connected_clients[client_address].sendall(bytes(f"It is player {player.symbol}'s turn",encoding='utf-8'))
+                
     # Accepts and assign new thread to each client
     def accept_connections(self, server_socket: socket.socket):
         client_socket, client_address = server_socket.accept()
@@ -85,7 +90,7 @@ class Server:
         })
 
         print(f'Incoming connection accepted. Address: {client_address}')
-        self.player_handler(client_socket, client_address)
+        start_new_thread(self.player_handler, (client_socket, client_address))
         start_new_thread(self.handle_player_choice, (client_socket, client_address))
 
     def start_server(self, host, port):

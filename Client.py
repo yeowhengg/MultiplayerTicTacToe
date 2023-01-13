@@ -2,6 +2,7 @@ import socket
 from _thread import *
 import select
 import json
+from queue import Queue
 
 host = '127.0.0.1'
 port = 6969
@@ -9,6 +10,7 @@ class Client:
     def __init__(self):
         print('Waiting for connection')
         self.board = None
+        self.queue = Queue()
     
     def print_board(self, board):
         self.board = json.loads(board)
@@ -34,24 +36,28 @@ class Client:
                 if col_input != "":
                     player_move.append(col_input)
 
-            client_socket.send(bytes(json.dumps(player_move), encoding='utf-8'))
+                client_socket.send(bytes(json.dumps(player_move), encoding='utf-8'))
             
     def incoming_message(self, client_socket):
-        initial_data = client_socket.recv(1024).decode()
-        player, board = initial_data.split(":")
-        print(player)
-        self.print_board(board)
-
         while True:
             ready_sockets, _, _ = select.select(
                 [client_socket], [], [], 60
             )
             if ready_sockets:
                 try:
-                    receive_board = client_socket.recv(1024).decode()
-                    self.print_board(receive_board)
+                    for sock in ready_sockets:
+                        data = sock.recv(1024).decode()
+                        self.queue.put(data)
                 except Exception as e:
                     print(e)
+
+    def handle_data(self):
+        while True:
+            data = self.queue.get()
+            if data == "-2":
+                continue
+
+            print(data)
                 
     def start_client(self):
         try:
@@ -60,17 +66,13 @@ class Client:
             client_socket.connect((host, port))
 
         except socket.error as e:
-            print(str(e))
+            print("Error ", e)
 
         if client_socket.recv(2).decode('utf-8') == '-1':
             print('Sorry, client has exceeded maximum of connection. Please try again at a later time.')
             client_socket.close()
 
-        # After establishing connection to the client, we can send messages back and forth from the client
-        
-        # Prints "you are connected to server"
-        print(client_socket.recv(1024).decode())
-
+        start_new_thread(self.handle_data, ())
         start_new_thread(self.incoming_message, (client_socket, ))
         start_new_thread(self.player_move_handler(client_socket, ))
 
