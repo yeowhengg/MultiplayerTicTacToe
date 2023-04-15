@@ -6,15 +6,13 @@ class Board:
     def get_board(self):
         return self.board
 
-    def CheckInBoard(self, row, column, player):
+    def check_in_board(self, row, column, player):
         if self.board[row - 1][column - 1] == " ":
             return True
         elif self.board[row - 1][column - 1] == player.symbol:
-            print(f"You already used this place!\nIt is still your turn, {player.symbol}:")
-            return False
+            return f"You already used this place!\nIt is still your turn, {player.symbol}:"
         elif self.board[row - 1][column - 1] != " " and self.board[row - 1][column - 1] != player.symbol:
-            print(f"This place has been claimed by the other player.\nIt is still your turn, {player.symbol}:")
-            return False
+            return f"This place has been claimed by the other player.\nIt is still your turn, {player.symbol}:"
 
     def set_player_in_board(self, row, column, player):
         self.row = row

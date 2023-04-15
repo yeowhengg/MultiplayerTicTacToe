@@ -39,8 +39,6 @@ class Client:
                     self.print_board(board)
                     continue
 
-                # board, turn = json.loads(data)
-
                 if "turn" in data[0] and "-1" in data[1]:
                     turn = data[0][1]
                     symbol = data[1][1]
