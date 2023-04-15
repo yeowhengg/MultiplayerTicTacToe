@@ -16,7 +16,7 @@ class Board:
             print(f"This place has been claimed by the other player.\nIt is still your turn, {player.symbol}:")
             return False
 
-    def SetPlayerInBoard(self, row, column, player):
+    def set_player_in_board(self, row, column, player):
         self.row = row
         self.column = column
         self.board[row - 1][column - 1] = player.symbol

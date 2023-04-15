@@ -1,13 +1,7 @@
-import Board as board
-
 class Player:
-    def __init__(self, symbol):
-        self.turn = False
-        self.position = None
-        self.symbol = symbol
-    
-    def turn_to_move(self, turn):
+    def __init__(self, symbol, turn):
         self.turn = turn
+        self.symbol = symbol
 
     def move(self, column, row):
         self.row = row
