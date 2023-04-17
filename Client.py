@@ -33,7 +33,9 @@ class Client:
                 
                 if not data:
                     continue
-                
+
+                print(data)
+
                 if "board" in data:
                     board = data[1]
                     self.print_board(board)
@@ -47,6 +49,7 @@ class Client:
                     print("It is your turn to move!")
                     row, col = self.player_input()
                     self.send_choice(row, col, client_socket)
+                
                 
                 else:
                     print("It is other player's turn!")

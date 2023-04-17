@@ -49,9 +49,13 @@ class Board:
             return "O"
         return ""
 
-    def GameWinOrLose(self, count, winner):
+    def game_win(self, count, winner):
         if count == 9:
             return True
         if winner == "X" or winner == "O":
             print(f"Congratulations {winner}! You won!")
+            return True
+    
+    def game_tie(self, count):
+        if count == 9:
             return True
