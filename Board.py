@@ -7,28 +7,32 @@ class Board:
         return self.board
 
     def check_in_board(self, row, column, player):
-        if self.board[row - 1][column - 1] == " ":
-            return True
-        elif self.board[row - 1][column - 1] == player.symbol:
-            return f"You already used this place!\nIt is still your turn, {player.symbol}:"
-        elif self.board[row - 1][column - 1] != " " and self.board[row - 1][column - 1] != player.symbol:
-            return f"This place has been claimed by the other player.\nIt is still your turn, {player.symbol}:"
+        try:
+            if self.board[row - 1][column - 1] == " ":
+                return True
+            elif self.board[row - 1][column - 1] == player.symbol:
+                return f"You already used this place!\nIt is still your turn, {player.symbol}:"
+            elif self.board[row - 1][column - 1] != " " and self.board[row - 1][column - 1] != player.symbol:
+                return f"This place has been claimed by the other player.\nIt is still your turn, {player.symbol}:"
+            
+        except IndexError:
+            return f"Your option, row: {row}, col: {column} does not fit in the board. Please try something else."
 
     def set_player_in_board(self, row, column, player):
         self.row = row
         self.column = column
         self.board[row - 1][column - 1] = player.symbol
 
-    def DiagonalWin(self):
-        leftDiagonalString = f"{self.board[0][0]}{self.board[1][1]}{self.board[2][2]}"
-        rightDiagonalString = f"{self.board[0][2]}{self.board[1][1]}{self.board[2][1]}"
-        if leftDiagonalString == "XXX" or rightDiagonalString == "XXX":
+    def diagonal_win(self):
+        left_diagonal_string = f"{self.board[0][0]}{self.board[1][1]}{self.board[2][2]}"
+        right_diagonal_string = f"{self.board[0][2]}{self.board[1][1]}{self.board[2][1]}"
+        if left_diagonal_string == "XXX" or right_diagonal_string == "XXX":
             return "X"
-        if leftDiagonalString == "OOO" or rightDiagonalString == "OOO":
+        if left_diagonal_string == "OOO" or right_diagonal_string == "OOO":
             return "O"
         return ""
 
-    def VerticalWin(self, column):
+    def vertical_win(self, column):
         concat = ""
         for i in range(len(self.board)):
             concat += self.board[i][column - 1]
@@ -38,7 +42,7 @@ class Board:
             return "O"
         return ""
 
-    def HorizontalWin(self):
+    def horizontal_win(self):
         concat = ""
         for i in range(len(self.board)):
             for j in range(len(self.board[i])):
@@ -57,5 +61,5 @@ class Board:
             return True
     
     def game_tie(self, count):
-        if count == 9:
+        if count == 2:
             return True

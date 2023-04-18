@@ -30,20 +30,29 @@ class Client:
                 data = json.loads(data)
                 turn = False
                 board = None
+                symbol = None
                 
                 if not data:
                     continue
-
-                print(data)
 
                 if "board" in data:
                     board = data[1]
                     self.print_board(board)
                     continue
+                
+                
+                if len(data) == 3 and data == "tie":
+                    print("Game has tied! No moves left")
+                    continue
 
                 if "turn" in data[0] and "-1" in data[1]:
                     turn = data[0][1]
                     symbol = data[1][1]
+                
+                if len(data) == 3 and "-2" in data[2] and data[2] != "":
+                    print(data[2][1])
+                else:
+                    print(f"You are: {symbol}")
 
                 if turn == True:
                     print("It is your turn to move!")
@@ -56,6 +65,7 @@ class Client:
                     
             except json.JSONDecodeError as e:
                 print(f"Error!: {e}")
+                print(len(data))
                 print(data)
             
             except Exception as e:

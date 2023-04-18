@@ -14,8 +14,9 @@ class Server:
         self.connected_client = {}
         self.client_socket = []
         self.sent_board = False
+        self.count = 0
 
-        self.board = board.get_board()
+        self.board = board
         self.start_server()
 
 
@@ -32,6 +33,9 @@ class Server:
                     if self.sent_board == False:
                         self.board_sender()
                         
+                        if self.game_logic():
+                            break
+                        
                         if player_obj.turn == True:
                             player_obj.turn = False
                         
@@ -43,8 +47,15 @@ class Server:
 
                         if data:
                             row, col = data.decode("utf-8").split(",")
+                            
+                            test = board.check_in_board(int(row), int(col), player_obj)
+                            if test != True:
+                                self.send_player_data(player_obj, False, test)
+                                continue
 
                             board.set_player_in_board(int(row), int(col), player_obj)
+                            self.count += 1
+
                             self.sent_board = False
                             
 
@@ -53,19 +64,38 @@ class Server:
         
 
     def board_sender(self):
-        data_to_send = json.dumps(["board", self.board])
+        data_to_send = json.dumps(["board", self.board.get_board()])
         for s in self.client_socket:
             s.sendall(data_to_send.encode())
 
         self.sent_board = True
 
-    def send_player_data(self, player_obj: Player):
+    # Sends the player's turn to everyone
+    def send_player_data(self, player_obj: Player, logic = True, error_message = ""):
         for i in self.connected_client:
-            if player_obj not in self.connected_client[i]:
+            if player_obj != self.connected_client[i][1] and logic:
                 self.connected_client[i][1].turn = True
+            elif logic == False:
+                pass
 
-            data_to_send = json.dumps([["turn", self.connected_client[i][1].turn], ["-1", self.connected_client[i][1].symbol]])
-            self.connected_client[i][0].sendall(data_to_send.encode())
+            data_to_send = [["turn", self.connected_client[i][1].turn], ["-1", self.connected_client[i][1].symbol]]
+
+            if error_message != "" and player_obj == self.connected_client[i][1]:
+                data_to_send.append(["-2", error_message])
+
+            dump_data_to_send = json.dumps(data_to_send)
+            self.connected_client[i][0].sendall(dump_data_to_send.encode())
+    
+    def game_logic(self):
+        print("game ended called")
+
+        if self.board.game_tie(self.count):
+            for i in self.connected_client:
+                self.connected_client[i][0].sendall(json.dumps("tie").encode())
+                print("loopy loops")
+        
+            return True
+
 
 
     def start_server(self):
