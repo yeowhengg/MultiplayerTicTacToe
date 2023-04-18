@@ -1,7 +1,5 @@
-import socket, _thread
-import select
+import socket
 import json
-from queue import Queue
 
 host = '127.0.0.1'
 port = 6969
@@ -97,35 +95,3 @@ class Client:
 
 
 Client()
-        
-
-    
-    # def print_board(self, board):
-    #     self.board = json.loads(board)
-    #     print("_______\n")
-    #     for row in range(0, len(self.board)):
-    #         for col in range(0, len(self.board[row])):
-    #             print("|", end='')
-    #             print(self.board[row][col], end='')
-    #         print("|")
-    #         print("\n")
-    #     print("_______")
-            
-
-    # def player_move_handler(self, client_socket):
-    #     while True:
-    #         player_move = []
-    #         row_input = input()
-
-    #         if row_input != "":
-    #             player_move.append(row_input)
-
-    #             col_input = input()
-    #             if col_input != "":
-    #                 player_move.append(col_input)
-
-    #             client_socket.send(bytes(json.dumps(player_move), encoding='utf-8'))
-
-        
-
-
