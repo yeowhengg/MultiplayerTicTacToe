@@ -12,3 +12,5 @@ Functionality not added:
     - restart of game
     - scoreboard
     - name
+
+Game.py used to be the local file I had used to test the functions of the game (runs single player)

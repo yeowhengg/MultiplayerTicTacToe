@@ -62,7 +62,6 @@ class Client:
                     row, col = self.player_input()
                     self.send_choice(row, col, client_socket)
                 
-                
                 else:
                     print("It is other player's turn!")
                     
