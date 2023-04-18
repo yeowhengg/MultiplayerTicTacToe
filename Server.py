@@ -6,7 +6,7 @@ from Player import *
 from random import Random
 
 # Declarations
-host = '127.0.0.1'
+host = '192.168.10.141'
 port = 6969
 
 class Server:
@@ -123,19 +123,17 @@ class Server:
         return to_return
 
     def start_server(self):
-        server = "127.0.0.1"
-        port = 6969
         sock = socket.socket()
         ran = Random()
         symbols = ["X", "O"]
         turn = [True, False]
         
         try:
-            sock.bind((server, port))
+            sock.bind((host, port))
         except socket.error as e:
             print(F"Error! {str(e)}")
 
-        sock.listen()
+        sock.listen(2)
 
         print("Started server.. Listening to incoming connections")
 
