@@ -15,6 +15,7 @@ class Server:
         self.client_socket = []
         self.sent_board = False
         self.count = 0
+        self.col = 0
 
         self.board = board
         self.start_server()
@@ -54,6 +55,7 @@ class Server:
                                 continue
 
                             board.set_player_in_board(int(row), int(col), player_obj)
+                            self.col = int(col)
                             self.count += 1
 
                             self.sent_board = False
@@ -87,16 +89,38 @@ class Server:
             self.connected_client[i][0].sendall(dump_data_to_send.encode())
     
     def game_logic(self):
-        print("game ended called")
+        to_return = False
+        game_end = ""
+        
+        diagonal_win = self.board.diagonal_win()
+        vertical_win = self.board.vertical_win(self.col)
+        horizontal_win = self.board.horizontal_win()
+
+        winner = ""
+        
+        if diagonal_win or vertical_win or horizontal_win:
+            winner = "X" if "X" in (diagonal_win or vertical_win or horizontal_win) else "O"
+            print(f"winner is {winner}")
+            game_end = winner
+
+            to_return = True
 
         if self.board.game_tie(self.count):
-            for i in self.connected_client:
-                self.connected_client[i][0].sendall(json.dumps("tie").encode())
-                print("loopy loops")
+            game_end = "tie"
+            to_return = True
         
-            return True
+        if game_end:
+            for i in self.connected_client:
+                if game_end == "tie":
+                    self.connected_client[i][0].sendall(json.dumps(game_end).encode())
 
-
+                else:
+                    if self.connected_client[i][1].symbol == winner:
+                        self.connected_client[i][0].sendall(json.dumps(game_end).encode())
+                    else:
+                        self.connected_client[i][0].sendall(json.dumps(game_end).encode())
+        
+        return to_return
 
     def start_server(self):
         server = "127.0.0.1"

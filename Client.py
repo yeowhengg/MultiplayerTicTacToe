@@ -8,6 +8,7 @@ port = 6969
 class Client:
     def __init__(self):
         self.start_client()
+        self.symbol = None
         print('Waiting for connection')
     
 
@@ -30,7 +31,6 @@ class Client:
                 data = json.loads(data)
                 turn = False
                 board = None
-                symbol = None
                 
                 if not data:
                     continue
@@ -40,19 +40,22 @@ class Client:
                     self.print_board(board)
                     continue
                 
-                
                 if len(data) == 3 and data == "tie":
                     print("Game has tied! No moves left")
                     continue
 
                 if "turn" in data[0] and "-1" in data[1]:
                     turn = data[0][1]
-                    symbol = data[1][1]
+                    self.symbol = data[1][1]
+                
+                if len(data) == 1 and "X" or "O" in data:
+                    print("You are the winner!") if self.symbol == data else print("You have lost!")
+                    continue
                 
                 if len(data) == 3 and "-2" in data[2] and data[2] != "":
                     print(data[2][1])
                 else:
-                    print(f"You are: {symbol}")
+                    print(f"You are: {self.symbol}")
 
                 if turn == True:
                     print("It is your turn to move!")
