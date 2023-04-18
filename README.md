@@ -1,4 +1,4 @@
-Online tic tac toe game!
+Online tic tac toe game that runs on your terminal
 
 Your pc acts as the server that hosts the game
 
@@ -13,6 +13,6 @@ Functionality not added:
     - restart of game
 
     - scoreboard
-    
+
     - name
 
